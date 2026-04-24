@@ -86,38 +86,67 @@ function ChangePasswordModal({
       return;
     }
     setStatus("saving");
-    const supabase = createClient();
 
-    // 15s hard timeout so a hanging request can't strand the UI.
-    const timeout = new Promise<{ error: { message: string } }>((resolve) =>
-      setTimeout(
-        () => resolve({ error: { message: "timeout after 15s" } }),
-        15_000,
-      ),
-    );
-    const call = supabase.auth
-      .updateUser({ password: newPwd })
-      .then(({ error }) => ({ error: error ? { message: error.message } : null }))
-      .catch((e: unknown) => ({
-        error: { message: e instanceof Error ? e.message : String(e) },
-      }));
+    try {
+      const supabase = createClient();
+      // Grab the current access token to call the REST endpoint directly —
+      // bypassing any auth-js internal queue that was hanging on us.
+      const { data: sessionData, error: sessionErr } =
+        await supabase.auth.getSession();
+      if (sessionErr || !sessionData.session) {
+        throw new Error(
+          sessionErr?.message ?? "No active session — please sign in again.",
+        );
+      }
+      const accessToken = sessionData.session.access_token;
 
-    const res = (await Promise.race([call, timeout])) as {
-      error: { message: string } | null;
-    };
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-    if (res.error) {
+      // Hard 15s abort on the network call itself.
+      const controller = new AbortController();
+      const tid = setTimeout(() => controller.abort(), 15_000);
+
+      const res = await fetch(`${url}/auth/v1/user`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+          apikey: anonKey,
+        },
+        body: JSON.stringify({ password: newPwd }),
+        signal: controller.signal,
+      });
+      clearTimeout(tid);
+
+      if (!res.ok) {
+        const body: { msg?: string; message?: string; error_description?: string } =
+          await res.json().catch(() => ({}));
+        throw new Error(
+          body.msg || body.message || body.error_description || `HTTP ${res.status}`,
+        );
+      }
+
+      // Tell the client its session is probably stale (Supabase issues a new
+      // access token after password change). A refresh in the background is
+      // safe to skip here — the cookie will be updated on the next request.
+      setStatus("success");
+      setNewPwd("");
+      setConfirm("");
+      setTimeout(() => {
+        setStatus("idle");
+        onOpenChange(false);
+      }, 1500);
+    } catch (e) {
+      const msg =
+        e instanceof DOMException && e.name === "AbortError"
+          ? "timeout after 15s"
+          : e instanceof Error
+            ? e.message
+            : String(e);
       setStatus("error");
-      setError(t.profile.changePasswordError + res.error.message);
-      return;
+      setError(t.profile.changePasswordError + msg);
     }
-    setStatus("success");
-    setNewPwd("");
-    setConfirm("");
-    setTimeout(() => {
-      setStatus("idle");
-      onOpenChange(false);
-    }, 1500);
   }
 
   return (
