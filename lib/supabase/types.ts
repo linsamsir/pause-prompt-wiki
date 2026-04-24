@@ -18,6 +18,7 @@ export type Profile = {
   avatar_url: string | null;
   nsfw_opt_in: boolean;
   age_verified: boolean;
+  birth_date: string | null;
   is_admin: boolean;
   created_at: string;
 };

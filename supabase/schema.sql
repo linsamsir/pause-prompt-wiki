@@ -24,6 +24,27 @@ create table if not exists public.profiles (
 alter table public.profiles
   add column if not exists age_verified boolean not null default false;
 
+alter table public.profiles
+  add column if not exists birth_date date;
+
+-- self-delete RPC: deletes auth.users row (cascades to profile + likes/favorites
+-- via FK). Callable by the authenticated user on their own account only.
+create or replace function public.delete_account()
+returns void language plpgsql security definer set search_path = public as $$
+declare
+  uid uuid;
+begin
+  uid := auth.uid();
+  if uid is null then
+    raise exception 'not authenticated';
+  end if;
+  delete from auth.users where id = uid;
+end;
+$$;
+
+revoke all on function public.delete_account() from public;
+grant execute on function public.delete_account() to authenticated;
+
 alter table public.profiles enable row level security;
 
 drop policy if exists "profiles read all" on public.profiles;

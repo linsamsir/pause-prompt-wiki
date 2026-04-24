@@ -101,12 +101,85 @@ type Dict = {
   login: {
     title: string;
     subtitle: string;
+    emailLabel: string;
     emailPlaceholder: string;
+    passwordLabel: string;
+    passwordPlaceholder: string;
+    loginCta: string;
+    signingIn: string;
     sendLink: string;
     checkEmail: string;
     error: string;
+    invalidCredentials: string;
+    needsConfirmation: string;
     redirectNotice: string;
     ageNotice: string;
+    or: string;
+    useMagicLinkInstead: string;
+    usePasswordInstead: string;
+    noAccount: string;
+    registerCta: string;
+  };
+  register: {
+    title: string;
+    subtitle: string;
+    emailLabel: string;
+    passwordLabel: string;
+    passwordHint: string;
+    confirmLabel: string;
+    birthDateLabel: string;
+    birthDateHint: string;
+    cta: string;
+    submitting: string;
+    success: string;
+    passwordTooShort: string;
+    passwordMismatch: string;
+    emailInUse: string;
+    error: string;
+    haveAccount: string;
+    loginCta: string;
+  };
+  profile: {
+    title: string;
+    subtitle: string;
+    basicInfo: string;
+    displayNameLabel: string;
+    usernameLabel: string;
+    birthDateLabel: string;
+    emailLabel: string;
+    save: string;
+    saving: string;
+    saved: string;
+    usernameTaken: string;
+    saveError: string;
+    tabPrompts: string;
+    tabFavorites: string;
+    emptyPrompts: string;
+    emptyFavorites: string;
+    contentPrefs: string;
+    nsfwVerified: string;
+    nsfwVerifyCta: string;
+    nsfwDesc: string;
+    dangerZone: string;
+    changePasswordTitle: string;
+    changePasswordCta: string;
+    changePasswordCurrent: string;
+    changePasswordNew: string;
+    changePasswordConfirm: string;
+    changePasswordSubmit: string;
+    changePasswordSuccess: string;
+    changePasswordMismatch: string;
+    changePasswordTooShort: string;
+    changePasswordError: string;
+    deleteTitle: string;
+    deleteDesc: string;
+    deleteConfirmHint: string;
+    deleteConfirmLabel: string;
+    deleteCta: string;
+    deleteSubmitting: string;
+    deleteError: string;
+    adminBadge: string;
+    verifiedBadge: string;
   };
   account: {
     menuTitle: string;
@@ -238,14 +311,87 @@ export const dict: Record<Locale, Dict> = {
       rank: "名次",
     },
     login: {
-      title: "登入 / 註冊",
-      subtitle: "輸入信箱取得 Magic Link，無需密碼。",
+      title: "登入",
+      subtitle: "使用信箱與密碼登入；首次造訪請先註冊。",
+      emailLabel: "信箱",
       emailPlaceholder: "your@email.com",
-      sendLink: "寄送登入連結",
+      passwordLabel: "密碼",
+      passwordPlaceholder: "輸入密碼",
+      loginCta: "登入",
+      signingIn: "登入中…",
+      sendLink: "寄送 Magic Link",
       checkEmail: "請檢查信箱並點擊連結完成登入。",
-      error: "寄送失敗，請稍後再試。",
+      error: "登入失敗，請稍後再試。",
+      invalidCredentials: "信箱或密碼錯誤。",
+      needsConfirmation: "請先點擊信箱內的驗證連結才能登入。",
       redirectNotice: "登入完成後將回到你剛才所在的頁面。",
       ageNotice: "若要瀏覽成人內容，需先登入並完成年齡確認。",
+      or: "或",
+      useMagicLinkInstead: "改用 Magic Link 登入",
+      usePasswordInstead: "改用密碼登入",
+      noAccount: "還沒有帳號？",
+      registerCta: "前往註冊",
+    },
+    register: {
+      title: "註冊",
+      subtitle: "建立新帳號，即可收藏、按讚、發表 Prompt。",
+      emailLabel: "信箱",
+      passwordLabel: "密碼",
+      passwordHint: "至少 6 個字元。",
+      confirmLabel: "再次輸入密碼",
+      birthDateLabel: "出生年月日（選填）",
+      birthDateHint: "用來確認年齡；不會公開顯示。",
+      cta: "建立帳號",
+      submitting: "建立中…",
+      success: "註冊成功，請至信箱完成驗證後再登入。",
+      passwordTooShort: "密碼至少需要 6 個字元。",
+      passwordMismatch: "兩次輸入的密碼不一致。",
+      emailInUse: "此信箱已被註冊，請直接登入。",
+      error: "註冊失敗，請稍後再試。",
+      haveAccount: "已經有帳號？",
+      loginCta: "直接登入",
+    },
+    profile: {
+      title: "個人資料",
+      subtitle: "管理你的帳號資訊、作品與偏好設定。",
+      basicInfo: "基本資料",
+      displayNameLabel: "顯示名稱",
+      usernameLabel: "使用者名稱",
+      birthDateLabel: "出生年月日",
+      emailLabel: "信箱",
+      save: "儲存",
+      saving: "儲存中…",
+      saved: "已儲存",
+      usernameTaken: "此使用者名稱已被使用。",
+      saveError: "儲存失敗：",
+      tabPrompts: "我的 Prompt",
+      tabFavorites: "我的收藏",
+      emptyPrompts: "還沒有發表過 Prompt。",
+      emptyFavorites: "還沒有收藏任何 Prompt。",
+      contentPrefs: "內容偏好",
+      nsfwVerified: "已完成 18+ 驗證",
+      nsfwVerifyCta: "進行年齡驗證",
+      nsfwDesc: "驗證 18 歲以上，才能在 header 啟用 NSFW 顯示。",
+      dangerZone: "危險區",
+      changePasswordTitle: "變更密碼",
+      changePasswordCta: "變更密碼",
+      changePasswordCurrent: "目前密碼（可略）",
+      changePasswordNew: "新密碼",
+      changePasswordConfirm: "再次輸入新密碼",
+      changePasswordSubmit: "更新密碼",
+      changePasswordSuccess: "密碼已更新。",
+      changePasswordMismatch: "兩次輸入不一致。",
+      changePasswordTooShort: "至少 6 個字元。",
+      changePasswordError: "更新失敗：",
+      deleteTitle: "刪除帳號",
+      deleteDesc: "此動作無法復原。你的 Prompt、收藏、按讚都會一併刪除。",
+      deleteConfirmHint: "請輸入你的信箱以確認：",
+      deleteConfirmLabel: "信箱",
+      deleteCta: "永久刪除帳號",
+      deleteSubmitting: "刪除中…",
+      deleteError: "刪除失敗：",
+      adminBadge: "管理員",
+      verifiedBadge: "18+",
     },
     account: {
       menuTitle: "帳戶",
@@ -378,14 +524,89 @@ export const dict: Record<Locale, Dict> = {
     },
     login: {
       title: "Sign in",
-      subtitle: "Enter your email for a magic link — no password required.",
+      subtitle: "Use your email and password. First time here? Register below.",
+      emailLabel: "Email",
       emailPlaceholder: "you@email.com",
+      passwordLabel: "Password",
+      passwordPlaceholder: "Your password",
+      loginCta: "Sign in",
+      signingIn: "Signing in…",
       sendLink: "Send magic link",
       checkEmail: "Check your email for the sign-in link.",
-      error: "Failed to send. Please try again.",
+      error: "Sign-in failed. Please try again.",
+      invalidCredentials: "Invalid email or password.",
+      needsConfirmation: "Please confirm your email first — check your inbox.",
       redirectNotice: "You'll be taken back to where you were after sign-in.",
       ageNotice:
         "Viewing adult content requires signing in and verifying your age.",
+      or: "or",
+      useMagicLinkInstead: "Use magic link instead",
+      usePasswordInstead: "Use password instead",
+      noAccount: "No account yet?",
+      registerCta: "Create one",
+    },
+    register: {
+      title: "Create account",
+      subtitle: "Sign up to like, save, and publish prompts.",
+      emailLabel: "Email",
+      passwordLabel: "Password",
+      passwordHint: "At least 6 characters.",
+      confirmLabel: "Confirm password",
+      birthDateLabel: "Date of birth (optional)",
+      birthDateHint: "Used for age verification; never shown publicly.",
+      cta: "Create account",
+      submitting: "Creating…",
+      success:
+        "Account created — check your inbox for the verification link before signing in.",
+      passwordTooShort: "Password must be at least 6 characters.",
+      passwordMismatch: "Passwords do not match.",
+      emailInUse: "That email is already registered. Please sign in instead.",
+      error: "Sign-up failed. Please try again.",
+      haveAccount: "Already have an account?",
+      loginCta: "Sign in",
+    },
+    profile: {
+      title: "Profile",
+      subtitle: "Manage your account, work, and preferences.",
+      basicInfo: "Basic info",
+      displayNameLabel: "Display name",
+      usernameLabel: "Username",
+      birthDateLabel: "Date of birth",
+      emailLabel: "Email",
+      save: "Save",
+      saving: "Saving…",
+      saved: "Saved",
+      usernameTaken: "Username already taken.",
+      saveError: "Save failed: ",
+      tabPrompts: "My Prompts",
+      tabFavorites: "My Favorites",
+      emptyPrompts: "No prompts published yet.",
+      emptyFavorites: "No favorites saved yet.",
+      contentPrefs: "Content preferences",
+      nsfwVerified: "18+ verified",
+      nsfwVerifyCta: "Verify age",
+      nsfwDesc: "Verify 18+ to enable the NSFW toggle in the header.",
+      dangerZone: "Danger zone",
+      changePasswordTitle: "Change password",
+      changePasswordCta: "Change password",
+      changePasswordCurrent: "Current password (optional)",
+      changePasswordNew: "New password",
+      changePasswordConfirm: "Confirm new password",
+      changePasswordSubmit: "Update password",
+      changePasswordSuccess: "Password updated.",
+      changePasswordMismatch: "Passwords do not match.",
+      changePasswordTooShort: "At least 6 characters.",
+      changePasswordError: "Update failed: ",
+      deleteTitle: "Delete account",
+      deleteDesc:
+        "This cannot be undone. Your prompts, favorites, and likes will all be removed.",
+      deleteConfirmHint: "Type your email to confirm:",
+      deleteConfirmLabel: "Email",
+      deleteCta: "Permanently delete account",
+      deleteSubmitting: "Deleting…",
+      deleteError: "Delete failed: ",
+      adminBadge: "Admin",
+      verifiedBadge: "18+",
     },
     account: {
       menuTitle: "Account",

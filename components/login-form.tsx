@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Loader2, Mail } from "lucide-react";
+import { LogIn, Mail, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useLocale } from "@/lib/i18n/provider";
 import { useSession } from "@/components/auth/session-provider";
@@ -19,6 +20,8 @@ function sanitizeRedirect(raw: string | null): string {
   return "/";
 }
 
+type Mode = "password" | "magic";
+
 export function LoginForm() {
   const { t } = useLocale();
   const search = useSearchParams();
@@ -27,12 +30,13 @@ export function LoginForm() {
   const redirect = sanitizeRedirect(search.get("redirect"));
   const reason = search.get("reason");
 
+  const [mode, setMode] = useState<Mode>("password");
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
-    "idle",
-  );
+  const [password, setPassword] = useState("");
+  const [status, setStatus] = useState<
+    "idle" | "sending" | "sent" | "error" | "invalid" | "unconfirmed"
+  >("idle");
 
-  // If already logged in, bounce straight to destination.
   useEffect(() => {
     if (user && redirect !== "/login") {
       router.replace(redirect);
@@ -42,10 +46,33 @@ export function LoginForm() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim()) return;
-    setStatus("sending");
     const supabase = createClient();
-    const origin =
-      typeof window !== "undefined" ? window.location.origin : "";
+    setStatus("sending");
+
+    if (mode === "password") {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (!error) {
+        setStatus("idle");
+        router.replace(redirect);
+        router.refresh();
+        return;
+      }
+      const msg = error.message.toLowerCase();
+      if (msg.includes("invalid") || msg.includes("credentials")) {
+        setStatus("invalid");
+      } else if (msg.includes("confirm")) {
+        setStatus("unconfirmed");
+      } else {
+        setStatus("error");
+      }
+      return;
+    }
+
+    // magic link
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
     const emailRedirectTo = `${origin}/auth/callback?next=${encodeURIComponent(
       redirect,
     )}`;
@@ -72,10 +99,11 @@ export function LoginForm() {
       )}
 
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{t.login.emailLabel}</Label>
         <Input
           id="email"
           type="email"
+          autoComplete="email"
           required
           placeholder={t.login.emailPlaceholder}
           value={email}
@@ -84,21 +112,80 @@ export function LoginForm() {
         />
       </div>
 
+      {mode === "password" && (
+        <div className="space-y-2">
+          <Label htmlFor="password">{t.login.passwordLabel}</Label>
+          <Input
+            id="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            placeholder={t.login.passwordPlaceholder}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={status === "sending"}
+          />
+        </div>
+      )}
+
       <Button type="submit" disabled={status === "sending"} className="w-full">
         {status === "sending" ? (
           <Loader2 className="size-4 animate-spin" />
+        ) : mode === "password" ? (
+          <LogIn className="size-4" />
         ) : (
           <Mail className="size-4" />
         )}
-        {t.login.sendLink}
+        {status === "sending"
+          ? t.login.signingIn
+          : mode === "password"
+            ? t.login.loginCta
+            : t.login.sendLink}
       </Button>
 
       {status === "sent" && (
         <p className="text-sm text-primary">{t.login.checkEmail}</p>
       )}
+      {status === "invalid" && (
+        <p className="text-sm text-destructive">{t.login.invalidCredentials}</p>
+      )}
+      {status === "unconfirmed" && (
+        <p className="text-sm text-destructive">{t.login.needsConfirmation}</p>
+      )}
       {status === "error" && (
         <p className="text-sm text-destructive">{t.login.error}</p>
       )}
+
+      <div className="flex items-center gap-3 text-xs">
+        <span className="h-px flex-1 bg-border" />
+        <span className="text-muted-foreground uppercase tracking-widest">
+          {t.login.or}
+        </span>
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
+      <button
+        type="button"
+        onClick={() => {
+          setMode((m) => (m === "password" ? "magic" : "password"));
+          setStatus("idle");
+        }}
+        className="w-full text-xs text-muted-foreground hover:text-primary underline underline-offset-4"
+      >
+        {mode === "password"
+          ? t.login.useMagicLinkInstead
+          : t.login.usePasswordInstead}
+      </button>
+
+      <p className="text-center text-xs text-muted-foreground">
+        {t.login.noAccount}{" "}
+        <Link
+          href={`/register?redirect=${encodeURIComponent(redirect)}`}
+          className="text-primary hover:underline"
+        >
+          {t.login.registerCta}
+        </Link>
+      </p>
     </form>
   );
 }

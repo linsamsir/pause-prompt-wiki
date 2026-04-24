@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { LogOut, Shield, User as UserIcon } from "lucide-react";
+import { LogOut, Shield, User as UserIcon, UserCog } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -87,10 +87,15 @@ export function UserMenu() {
           )}
         </div>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href="/profile" className="flex w-full items-center gap-2">
+            <UserIcon className="size-4" /> {t.account.profile}
+          </Link>
+        </DropdownMenuItem>
         {profile?.is_admin && (
           <DropdownMenuItem asChild>
             <Link href="/admin" className="flex w-full items-center gap-2">
-              <UserIcon className="size-4" /> {t.account.admin}
+              <UserCog className="size-4" /> {t.account.admin}
             </Link>
           </DropdownMenuItem>
         )}
