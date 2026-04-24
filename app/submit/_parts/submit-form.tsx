@@ -71,12 +71,53 @@ export function SubmitForm({ categories }: { categories: Category[] }) {
       is_published: false,
     };
 
+    // Direct PostgREST insert — supabase.from().insert() was hanging the UI
+    // in some sessions (same auth-js queue issue that affected updateUser).
+    // Going through fetch with a 15s abort guarantees a result either way.
     const supabase = createClient();
-    const { error: err } = await supabase.from("prompts").insert(payload);
-    setSubmitting(false);
+    let errMsg: string | null = null;
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) throw new Error("no active session");
 
-    if (err) {
-      setError(t.submit.error + err.message);
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+      const controller = new AbortController();
+      const tid = setTimeout(() => controller.abort(), 15_000);
+
+      const res = await fetch(`${url}/rest/v1/prompts`, {
+        method: "POST",
+        headers: {
+          apikey: anonKey,
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Prefer: "return=minimal",
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      clearTimeout(tid);
+
+      if (!res.ok) {
+        const body: { message?: string; msg?: string; hint?: string } =
+          await res.json().catch(() => ({}));
+        errMsg =
+          body.message || body.msg || body.hint || `HTTP ${res.status}`;
+      }
+    } catch (e) {
+      errMsg =
+        e instanceof DOMException && e.name === "AbortError"
+          ? "timeout after 15s"
+          : e instanceof Error
+            ? e.message
+            : String(e);
+    }
+
+    setSubmitting(false);
+    if (errMsg) {
+      setError(t.submit.error + errMsg);
       return;
     }
 
