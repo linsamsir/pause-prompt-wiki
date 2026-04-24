@@ -114,7 +114,15 @@ export function LoginForm() {
 
       {mode === "password" && (
         <div className="space-y-2">
-          <Label htmlFor="password">{t.login.passwordLabel}</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">{t.login.passwordLabel}</Label>
+            <Link
+              href="/forgot-password"
+              className="text-[11px] text-muted-foreground hover:text-primary"
+            >
+              {t.login.forgotPassword}
+            </Link>
+          </div>
           <Input
             id="password"
             type="password"

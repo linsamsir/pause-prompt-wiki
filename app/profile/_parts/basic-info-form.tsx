@@ -5,6 +5,7 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { useSession } from "@/components/auth/session-provider";
 import { useLocale } from "@/lib/i18n/provider";
 import { createClient } from "@/lib/supabase/client";
+import { updateAuthUser } from "@/lib/supabase/auth-direct";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,18 +48,32 @@ export function BasicInfoForm() {
       .from("profiles")
       .update(updates)
       .eq("id", user.id);
-    setSaving(false);
     if (err) {
+      setSaving(false);
       if (err.message?.toLowerCase().includes("unique")) {
         setError(t.profile.usernameTaken);
       } else {
         setError(t.profile.saveError + err.message);
       }
-    } else {
-      await refreshProfile();
-      setSaved(true);
-      setTimeout(() => setSaved(false), 3000);
+      return;
     }
+
+    // Also mirror display_name into auth.users.raw_user_meta_data so the
+    // Supabase Auth Dashboard (and any OAuth identity providers) see the same
+    // name we show in the app. Non-fatal — we still report overall success
+    // if only this part fails.
+    await updateAuthUser({
+      data: {
+        display_name: updates.display_name,
+        name: updates.display_name,
+        username: updates.username,
+      },
+    });
+
+    setSaving(false);
+    await refreshProfile();
+    setSaved(true);
+    setTimeout(() => setSaved(false), 3000);
   }
 
   return (

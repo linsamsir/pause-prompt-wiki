@@ -6,6 +6,7 @@ import { KeyRound, Loader2, Trash2 } from "lucide-react";
 import { useLocale } from "@/lib/i18n/provider";
 import { useSession } from "@/components/auth/session-provider";
 import { createClient } from "@/lib/supabase/client";
+import { updateAuthUser } from "@/lib/supabase/auth-direct";
 import {
   Dialog,
   DialogContent,
@@ -86,67 +87,19 @@ function ChangePasswordModal({
       return;
     }
     setStatus("saving");
-
-    try {
-      const supabase = createClient();
-      // Grab the current access token to call the REST endpoint directly —
-      // bypassing any auth-js internal queue that was hanging on us.
-      const { data: sessionData, error: sessionErr } =
-        await supabase.auth.getSession();
-      if (sessionErr || !sessionData.session) {
-        throw new Error(
-          sessionErr?.message ?? "No active session — please sign in again.",
-        );
-      }
-      const accessToken = sessionData.session.access_token;
-
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-      // Hard 15s abort on the network call itself.
-      const controller = new AbortController();
-      const tid = setTimeout(() => controller.abort(), 15_000);
-
-      const res = await fetch(`${url}/auth/v1/user`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-          apikey: anonKey,
-        },
-        body: JSON.stringify({ password: newPwd }),
-        signal: controller.signal,
-      });
-      clearTimeout(tid);
-
-      if (!res.ok) {
-        const body: { msg?: string; message?: string; error_description?: string } =
-          await res.json().catch(() => ({}));
-        throw new Error(
-          body.msg || body.message || body.error_description || `HTTP ${res.status}`,
-        );
-      }
-
-      // Tell the client its session is probably stale (Supabase issues a new
-      // access token after password change). A refresh in the background is
-      // safe to skip here — the cookie will be updated on the next request.
-      setStatus("success");
-      setNewPwd("");
-      setConfirm("");
-      setTimeout(() => {
-        setStatus("idle");
-        onOpenChange(false);
-      }, 1500);
-    } catch (e) {
-      const msg =
-        e instanceof DOMException && e.name === "AbortError"
-          ? "timeout after 15s"
-          : e instanceof Error
-            ? e.message
-            : String(e);
+    const { error: err } = await updateAuthUser({ password: newPwd });
+    if (err) {
       setStatus("error");
-      setError(t.profile.changePasswordError + msg);
+      setError(t.profile.changePasswordError + err);
+      return;
     }
+    setStatus("success");
+    setNewPwd("");
+    setConfirm("");
+    setTimeout(() => {
+      setStatus("idle");
+      onOpenChange(false);
+    }, 1500);
   }
 
   return (

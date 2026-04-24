@@ -119,6 +119,7 @@ type Dict = {
     usePasswordInstead: string;
     noAccount: string;
     registerCta: string;
+    forgotPassword: string;
   };
   register: {
     title: string;
@@ -186,6 +187,7 @@ type Dict = {
     profile: string;
     favorites: string;
     admin: string;
+    submit: string;
     signOut: string;
     signingOut: string;
   };
@@ -209,6 +211,55 @@ type Dict = {
     categories: string;
     elements: string;
     stats: string;
+  };
+  forgot: {
+    title: string;
+    subtitle: string;
+    emailLabel: string;
+    cta: string;
+    submitting: string;
+    sent: string;
+    error: string;
+    backToLogin: string;
+  };
+  reset: {
+    title: string;
+    subtitle: string;
+    newPassword: string;
+    confirmPassword: string;
+    cta: string;
+    submitting: string;
+    success: string;
+    mismatch: string;
+    tooShort: string;
+    error: string;
+    noSession: string;
+  };
+  submit: {
+    title: string;
+    subtitle: string;
+    fieldTitleZh: string;
+    fieldTitleEn: string;
+    fieldDescZh: string;
+    fieldDescEn: string;
+    fieldBody: string;
+    fieldBodyHint: string;
+    fieldNegative: string;
+    fieldParameters: string;
+    fieldModel: string;
+    fieldTags: string;
+    fieldTagsHint: string;
+    fieldCategory: string;
+    fieldCategoryNone: string;
+    fieldSlug: string;
+    fieldSlugHint: string;
+    fieldNsfw: string;
+    fieldNsfwHint: string;
+    cta: string;
+    submitting: string;
+    success: string;
+    error: string;
+    draftNotice: string;
   };
 };
 
@@ -331,6 +382,7 @@ export const dict: Record<Locale, Dict> = {
       usePasswordInstead: "改用密碼登入",
       noAccount: "還沒有帳號？",
       registerCta: "前往註冊",
+      forgotPassword: "忘記密碼？",
     },
     register: {
       title: "註冊",
@@ -398,6 +450,7 @@ export const dict: Record<Locale, Dict> = {
       profile: "個人頁面",
       favorites: "我的收藏",
       admin: "管理後台",
+      submit: "投稿 Prompt",
       signOut: "登出",
       signingOut: "登出中…",
     },
@@ -421,6 +474,55 @@ export const dict: Record<Locale, Dict> = {
       categories: "分類",
       elements: "Builder 元素",
       stats: "統計",
+    },
+    forgot: {
+      title: "忘記密碼",
+      subtitle: "輸入你的信箱，我們會寄一封密碼重設信給你。",
+      emailLabel: "信箱",
+      cta: "寄送重設連結",
+      submitting: "寄送中…",
+      sent: "已寄出。請到信箱點擊連結設定新密碼。",
+      error: "寄送失敗，請稍後再試。",
+      backToLogin: "回到登入頁",
+    },
+    reset: {
+      title: "重設密碼",
+      subtitle: "設定新密碼，完成後會直接登入。",
+      newPassword: "新密碼",
+      confirmPassword: "再次輸入新密碼",
+      cta: "更新密碼",
+      submitting: "更新中…",
+      success: "密碼已更新，正在進入帳戶…",
+      mismatch: "兩次輸入不一致。",
+      tooShort: "密碼至少 6 個字元。",
+      error: "更新失敗：",
+      noSession: "重設連結已失效，請重新寄送。",
+    },
+    submit: {
+      title: "投稿 Prompt",
+      subtitle: "你的作品會以草稿儲存，管理員審核後就會上架。",
+      fieldTitleZh: "標題（中）",
+      fieldTitleEn: "Title（英，選填）",
+      fieldDescZh: "描述（中）",
+      fieldDescEn: "Description（英，選填）",
+      fieldBody: "Prompt 內容",
+      fieldBodyHint: "完整提示詞。這是最重要的欄位。",
+      fieldNegative: "反向詞（選填）",
+      fieldParameters: "參數（選填）",
+      fieldModel: "模型（選填，如 SDXL / Flux / Midjourney）",
+      fieldTags: "標籤（以逗號分隔，選填）",
+      fieldTagsHint: "例如：japan, night, moody",
+      fieldCategory: "分類",
+      fieldCategoryNone: "— 無 —",
+      fieldSlug: "Slug（選填）",
+      fieldSlugHint: "留空會由標題自動產生。",
+      fieldNsfw: "成人內容",
+      fieldNsfwHint: "勾選後此 prompt 只會對完成年齡驗證的使用者顯示。",
+      cta: "送出投稿",
+      submitting: "送出中…",
+      success: "投稿成功！你可以在個人資料的「我的 Prompt」看到這份草稿。",
+      error: "投稿失敗：",
+      draftNotice: "此投稿會先以草稿狀態存檔，管理員審核通過後才會對外顯示。",
     },
   },
   en: {
@@ -544,6 +646,7 @@ export const dict: Record<Locale, Dict> = {
       usePasswordInstead: "Use password instead",
       noAccount: "No account yet?",
       registerCta: "Create one",
+      forgotPassword: "Forgot password?",
     },
     register: {
       title: "Create account",
@@ -613,6 +716,7 @@ export const dict: Record<Locale, Dict> = {
       profile: "Profile",
       favorites: "My favorites",
       admin: "Admin",
+      submit: "Submit a prompt",
       signOut: "Sign out",
       signingOut: "Signing out…",
     },
@@ -636,6 +740,58 @@ export const dict: Record<Locale, Dict> = {
       categories: "Categories",
       elements: "Builder elements",
       stats: "Stats",
+    },
+    forgot: {
+      title: "Forgot password",
+      subtitle: "Enter your email and we'll send you a password reset link.",
+      emailLabel: "Email",
+      cta: "Send reset link",
+      submitting: "Sending…",
+      sent: "Sent. Check your inbox and follow the link to set a new password.",
+      error: "Failed to send. Please try again.",
+      backToLogin: "Back to sign in",
+    },
+    reset: {
+      title: "Reset password",
+      subtitle: "Set a new password — you'll be signed in right after.",
+      newPassword: "New password",
+      confirmPassword: "Confirm new password",
+      cta: "Update password",
+      submitting: "Updating…",
+      success: "Password updated — signing you in…",
+      mismatch: "Passwords do not match.",
+      tooShort: "Password must be at least 6 characters.",
+      error: "Update failed: ",
+      noSession: "This reset link has expired. Please request a new one.",
+    },
+    submit: {
+      title: "Submit a prompt",
+      subtitle: "Your submission is saved as a draft; an admin will review and publish.",
+      fieldTitleZh: "Title (zh)",
+      fieldTitleEn: "Title (en, optional)",
+      fieldDescZh: "Description (zh)",
+      fieldDescEn: "Description (en, optional)",
+      fieldBody: "Prompt body",
+      fieldBodyHint: "The full prompt text. This is the most important field.",
+      fieldNegative: "Negative (optional)",
+      fieldParameters: "Parameters (optional)",
+      fieldModel: "Model (optional — e.g. SDXL, Flux, Midjourney)",
+      fieldTags: "Tags (comma-separated, optional)",
+      fieldTagsHint: "e.g. japan, night, moody",
+      fieldCategory: "Category",
+      fieldCategoryNone: "— none —",
+      fieldSlug: "Slug (optional)",
+      fieldSlugHint: "Leave blank to auto-generate from title.",
+      fieldNsfw: "NSFW",
+      fieldNsfwHint:
+        "When checked, this prompt is visible only to viewers who've verified they are 18+.",
+      cta: "Submit",
+      submitting: "Submitting…",
+      success:
+        "Submitted! You'll find this draft under 'My Prompts' in your profile.",
+      error: "Submit failed: ",
+      draftNotice:
+        "Submissions are saved as drafts and go live after admin review.",
     },
   },
 };
