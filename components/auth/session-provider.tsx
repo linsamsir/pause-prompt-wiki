@@ -89,7 +89,35 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   }, [supabase, user, fetchProfile]);
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+    // Kick the server revoke in the background with a timeout so the UI never
+    // stalls on it. The local signOut clears cookies + storage immediately.
+    try {
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (url && anonKey && token) {
+        const ctrl = new AbortController();
+        setTimeout(() => ctrl.abort(), 3000);
+        // fire-and-forget
+        fetch(`${url}/auth/v1/logout`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            apikey: anonKey,
+          },
+          signal: ctrl.signal,
+        }).catch(() => {});
+      }
+    } catch {
+      /* noop */
+    }
+    // Local scope: just clear client state, never hits the network.
+    try {
+      await supabase.auth.signOut({ scope: "local" });
+    } catch {
+      /* noop */
+    }
     setUser(null);
     setProfile(null);
   }, [supabase]);

@@ -28,7 +28,24 @@ export function createClient(): SupabaseClient {
 
   cached = createBrowserClient(url, key, {
     auth: {
+      // No-op lock: defuse the navigator.lock deadlock we hit on updateUser.
       lock: async (_name, _acquireTimeout, fn) => fn(),
+      // Explicit defaults — guard against regressions in future SDKs.
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+    // Pin a 1-year max-age on the auth cookies so closing the window doesn't
+    // evict the session. @supabase/ssr's own browser defaults should already
+    // do this, but we override to be sure — previously sessions disappeared on
+    // browser restart.
+    cookieOptions: {
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+      path: "/",
+      secure: typeof window !== "undefined"
+        ? window.location.protocol === "https:"
+        : true,
     },
   });
   return cached;
