@@ -86,14 +86,16 @@ export function BuilderForm({
     setSelected(next);
   }
 
+  // Concatenate every type except `negative` (which is output in its own
+  // field). Order follows BUILDER_ELEMENT_TYPES so the natural prompt-writing
+  // flow shows up in the rendered text.
   const prompt = useMemo(() => {
     const parts: string[] = [];
-    (
-      ["subject", "scene", "lighting", "camera", "style", "quality"] as const
-    ).forEach((k) => {
+    for (const k of BUILDER_ELEMENT_TYPES) {
+      if (k === "negative") continue;
       const picks = selected[k].map((e) => e.value);
       if (picks.length) parts.push(picks.join(", "));
-    });
+    }
     return parts.join(", ");
   }, [selected]);
 
@@ -105,6 +107,10 @@ export function BuilderForm({
         {BUILDER_ELEMENT_TYPES.map((type) => {
           const meta = BUILDER_ELEMENT_LABELS[type];
           const options = byType[type];
+          // Hide sections with no visible options — this collapses NSFW-only
+          // types like `anatomy` when the NSFW toggle is off, and keeps the
+          // builder tidy for types the library doesn't yet cover.
+          if (options.length === 0) return null;
           return (
             <section key={type} className="washi-card p-5">
               <header className="flex items-baseline justify-between gap-2">
@@ -125,12 +131,7 @@ export function BuilderForm({
               </header>
 
               <div className="mt-3 flex flex-wrap gap-2">
-                {options.length === 0 ? (
-                  <span className="text-xs text-muted-foreground">
-                    {t.common.empty}
-                  </span>
-                ) : (
-                  options.map((el) => {
+                {options.map((el) => {
                     const on = !!selected[type].find((x) => x.id === el.id);
                     return (
                       <button
@@ -152,8 +153,7 @@ export function BuilderForm({
                         </span>
                       </button>
                     );
-                  })
-                )}
+                  })}
               </div>
             </section>
           );

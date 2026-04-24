@@ -205,8 +205,10 @@ grant execute on function public.increment_views(uuid) to anon, authenticated;
 -- ---------------------------------------------------------------------
 create table if not exists public.builder_elements (
   id uuid primary key default gen_random_uuid(),
-  type text not null check (type in
-    ('subject','scene','lighting','camera','style','quality','negative')),
+  type text not null check (type in (
+    'subject','pose','wardrobe','anatomy','emotion','action',
+    'scene','lighting','camera','style','quality','audio','negative'
+  )),
   label_zh text not null,
   label_en text,
   value text not null,
@@ -214,6 +216,18 @@ create table if not exists public.builder_elements (
   weight int not null default 0,
   created_at timestamptz not null default now()
 );
+
+-- for existing installations: widen the type CHECK constraint
+do $$
+begin
+  alter table public.builder_elements drop constraint if exists builder_elements_type_check;
+  alter table public.builder_elements
+    add constraint builder_elements_type_check
+    check (type in (
+      'subject','pose','wardrobe','anatomy','emotion','action',
+      'scene','lighting','camera','style','quality','audio','negative'
+    ));
+end $$;
 
 create index if not exists builder_elements_type_weight_idx
   on public.builder_elements (type, weight desc);

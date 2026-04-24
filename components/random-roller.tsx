@@ -30,28 +30,30 @@ export function RandomRoller({ elements }: { elements: BuilderElement[] }) {
     for (const ty of BUILDER_ELEMENT_TYPES) byType[ty] = [];
     for (const e of pool) byType[e.type].push(e);
 
-    const result: Record<BuilderElementType, BuilderElement | null> = {
-      subject: pick(byType.subject),
-      scene: pick(byType.scene),
-      lighting: pick(byType.lighting),
-      camera: pick(byType.camera),
-      style: pick(byType.style),
-      quality: pick(byType.quality),
-      negative: pick(byType.negative),
-    };
+    const result = {} as Record<BuilderElementType, BuilderElement | null>;
+    for (const ty of BUILDER_ELEMENT_TYPES) {
+      result[ty] = pick(byType[ty]);
+    }
     return result;
   }, [elements, showNsfw, seed]);
 
+  // Everything except `negative` goes into the main prompt, in the order
+  // declared by BUILDER_ELEMENT_TYPES.
   const prompt = useMemo(() => {
-    return (
-      ["subject", "scene", "lighting", "camera", "style", "quality"] as const
-    )
+    return BUILDER_ELEMENT_TYPES.filter((k) => k !== "negative")
       .map((k) => rolled[k]?.value)
       .filter(Boolean)
       .join(", ");
   }, [rolled]);
 
   const negative = rolled.negative?.value ?? "";
+
+  // Hide cards for types with no library entries in the current filter —
+  // otherwise the grid sprouts empty "—" tiles for NSFW-only types when the
+  // toggle is off.
+  const visibleTypes = BUILDER_ELEMENT_TYPES.filter(
+    (k) => k !== "negative" && rolled[k] !== null,
+  );
 
   return (
     <div className="space-y-6">
@@ -62,25 +64,35 @@ export function RandomRoller({ elements }: { elements: BuilderElement[] }) {
         </Button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        {BUILDER_ELEMENT_TYPES.filter((k) => k !== "negative").map((ty) => {
-          const el = rolled[ty];
-          const meta = BUILDER_ELEMENT_LABELS[ty];
-          return (
-            <div key={ty} className="washi-card p-4">
-              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-                {locale === "zh" ? meta.zh : meta.en}
+      {visibleTypes.length === 0 ? (
+        <div className="washi-card p-6 text-center text-sm text-muted-foreground">
+          {t.common.empty}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          {visibleTypes.map((ty) => {
+            const el = rolled[ty];
+            const meta = BUILDER_ELEMENT_LABELS[ty];
+            return (
+              <div key={ty} className="washi-card p-4">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                  {locale === "zh" ? meta.zh : meta.en}
+                </div>
+                <div className="mt-2 font-serif-tc text-base font-semibold leading-tight">
+                  {el
+                    ? locale === "zh"
+                      ? el.label_zh
+                      : el.label_en ?? el.label_zh
+                    : "—"}
+                </div>
+                <div className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                  {el?.value}
+                </div>
               </div>
-              <div className="mt-2 font-serif-tc text-base font-semibold leading-tight">
-                {el ? (locale === "zh" ? el.label_zh : el.label_en ?? el.label_zh) : "—"}
-              </div>
-              <div className="mt-1 text-xs text-muted-foreground line-clamp-2">
-                {el?.value}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       <div className="washi-card p-5">
         <div className="flex items-center justify-between">
