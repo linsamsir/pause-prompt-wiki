@@ -87,10 +87,28 @@ function ChangePasswordModal({
     }
     setStatus("saving");
     const supabase = createClient();
-    const { error: err } = await supabase.auth.updateUser({ password: newPwd });
-    if (err) {
+
+    // 15s hard timeout so a hanging request can't strand the UI.
+    const timeout = new Promise<{ error: { message: string } }>((resolve) =>
+      setTimeout(
+        () => resolve({ error: { message: "timeout after 15s" } }),
+        15_000,
+      ),
+    );
+    const call = supabase.auth
+      .updateUser({ password: newPwd })
+      .then(({ error }) => ({ error: error ? { message: error.message } : null }))
+      .catch((e: unknown) => ({
+        error: { message: e instanceof Error ? e.message : String(e) },
+      }));
+
+    const res = (await Promise.race([call, timeout])) as {
+      error: { message: string } | null;
+    };
+
+    if (res.error) {
       setStatus("error");
-      setError(t.profile.changePasswordError + err.message);
+      setError(t.profile.changePasswordError + res.error.message);
       return;
     }
     setStatus("success");
