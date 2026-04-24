@@ -1,0 +1,158 @@
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+/*
+ * Pause Prompt Wiki — 日系 beni 紅主題
+ * 主色 #C0392B（紅）、米白背景、直角卡片細邊
+ */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-sumi: #1a1a1a;
+  --color-washi: #f5f1e8;
+  --color-beni: #c0392b;
+  --color-beni-dark: #922a1e;
+  --color-kincha: #b8860b;
+
+  --font-serif: var(--font-noto-serif-tc), "Noto Serif TC", "Noto Serif JP", serif;
+  --font-sans: var(--font-noto-sans-tc), "Noto Sans TC", "Noto Sans JP", sans-serif;
+
+  --radius: 2px;
+}
+
+:root {
+  --background: #faf7f0;
+  --foreground: #1a1a1a;
+
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+
+  --primary: #c0392b;
+  --primary-foreground: #faf7f0;
+
+  --secondary: #f5f1e8;
+  --secondary-foreground: #1a1a1a;
+
+  --muted: #f0ebe0;
+  --muted-foreground: #6b6258;
+
+  --accent: #f5f1e8;
+  --accent-foreground: #c0392b;
+
+  --destructive: #c0392b;
+  --destructive-foreground: #faf7f0;
+
+  --border: #d9d3c4;
+  --input: #d9d3c4;
+  --ring: #c0392b;
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html {
+    font-family: var(--font-sans);
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-feature-settings: "palt";
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-serif);
+    letter-spacing: 0.02em;
+  }
+  .font-serif-tc { font-family: var(--font-serif); }
+  .font-sans-tc { font-family: var(--font-sans); }
+}
+
+@layer components {
+  /* 日系裝飾：左側紅色粗線 section 標題 */
+  .section-title {
+    position: relative;
+    padding-left: 0.9rem;
+    font-family: var(--font-serif);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+  .section-title::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.2em;
+    bottom: 0.2em;
+    width: 4px;
+    background: var(--color-beni);
+  }
+
+  /* 直角卡片細邊框 */
+  .washi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    transition: border-color 150ms ease, transform 150ms ease;
+  }
+  .washi-card:hover {
+    border-color: var(--color-beni);
+  }
+
+  /* 印章式紅色 badge */
+  .stamp {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1rem 0.5rem;
+    font-family: var(--font-serif);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--color-beni);
+    border: 1px solid var(--color-beni);
+    background: transparent;
+  }
+  .stamp-filled {
+    color: var(--primary-foreground);
+    background: var(--color-beni);
+  }
+
+  /* 雙線分隔 */
+  .double-line {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 4px 0;
+  }
+}
+
+::selection {
+  background: #c0392b;
+  color: #faf7f0;
+}
