@@ -28,10 +28,22 @@ import type {
 export const dynamic = "force-dynamic";
 
 async function loadData() {
-  const supabase = await createClient();
+  const empty = {
+    hot: [] as PromptWithRelations[],
+    categories: [] as Category[],
+    stats: { prompts: 0, users: 0, likes: 0 },
+  };
 
-  const [{ data: hot }, { data: cats }, { count: promptsCount }, { count: usersCount }] =
-    await Promise.all([
+  try {
+    const supabase = await createClient();
+
+    const [
+      { data: hot },
+      { data: cats },
+      { count: promptsCount },
+      { count: usersCount },
+      likesAgg,
+    ] = await Promise.all([
       supabase
         .from("prompts")
         .select(
@@ -40,29 +52,34 @@ async function loadData() {
         .eq("is_published", true)
         .order("likes_count", { ascending: false })
         .limit(6),
-      supabase.from("categories").select("*").order("order", { ascending: true }),
+      supabase
+        .from("categories")
+        .select("*")
+        .order("order", { ascending: true }),
       supabase
         .from("prompts")
         .select("id", { count: "exact", head: true })
         .eq("is_published", true),
       supabase.from("profiles").select("id", { count: "exact", head: true }),
+      supabase.from("prompts").select("likes_count"),
     ]);
 
-  const likesAgg = await supabase
-    .from("prompts")
-    .select("likes_count");
-  const totalLikes =
-    likesAgg.data?.reduce((s, r) => s + (r.likes_count ?? 0), 0) ?? 0;
+    const totalLikes =
+      likesAgg.data?.reduce((s, r) => s + (r.likes_count ?? 0), 0) ?? 0;
 
-  return {
-    hot: (hot ?? []) as PromptWithRelations[],
-    categories: (cats ?? []) as Category[],
-    stats: {
-      prompts: promptsCount ?? 0,
-      users: usersCount ?? 0,
-      likes: totalLikes,
-    },
-  };
+    return {
+      hot: (hot ?? []) as PromptWithRelations[],
+      categories: (cats ?? []) as Category[],
+      stats: {
+        prompts: promptsCount ?? 0,
+        users: usersCount ?? 0,
+        likes: totalLikes,
+      },
+    };
+  } catch (err) {
+    console.error("[home] loadData failed:", err);
+    return empty;
+  }
 }
 
 export default async function HomePage() {

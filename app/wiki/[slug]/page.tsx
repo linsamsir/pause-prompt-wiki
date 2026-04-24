@@ -67,11 +67,12 @@ export default async function PromptDetailPage({
     initialFav = !!favRow;
   }
 
-  // Fire-and-forget view increment
-  await supabase.rpc("increment_views", { p_id: prompt.id }).throwOnError().then(
-    () => {},
-    () => {},
-  );
+  // Fire-and-forget view increment — never block or fail the page on this.
+  try {
+    await supabase.rpc("increment_views", { p_id: prompt.id });
+  } catch {
+    /* noop */
+  }
 
   return (
     <article className="mx-auto max-w-4xl px-6 py-10">
