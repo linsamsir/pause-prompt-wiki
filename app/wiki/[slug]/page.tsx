@@ -33,7 +33,7 @@ export default async function PromptDetailPage({
   const { slug } = await params;
   const supabase = await createClient();
 
-  const { data: prompt } = await supabase
+  const { data: prompt, error: promptErr } = await supabase
     .from("prompts")
     .select(
       "*, category:categories!category_id(id, slug, name_zh, name_en), author:profiles!author_id(id, username, display_name, avatar_url)",
@@ -45,7 +45,21 @@ export default async function PromptDetailPage({
     // author, breaking the "submit then preview" flow.
     .maybeSingle<PromptWithRelations>();
 
-  if (!prompt) notFound();
+  if (!prompt) {
+    const enc = new TextEncoder();
+    const bytes = enc.encode(slug);
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+    return (
+      <pre className="p-6 text-xs">
+        DEBUG: not found
+        {"\n"}slug: {slug}
+        {"\n"}charLen: {slug.length}
+        {"\n"}byteLen: {bytes.length}
+        {"\n"}hex: {hex}
+        {"\n"}error: {promptErr?.message ?? "(none)"}
+      </pre>
+    );
+  }
 
   const {
     data: { user },
