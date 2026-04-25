@@ -145,11 +145,23 @@ export function SubmitForm({ categories }: { categories: Category[] }) {
     return (
       <div className="washi-card p-6 space-y-4">
         <p className="text-sm text-primary">{t.submit.success}</p>
-        <div className="flex gap-3">
+        <div className="border border-border bg-secondary/40 p-3 text-xs">
+          <span className="text-muted-foreground">URL:</span>{" "}
+          <Link
+            href={`/wiki/${successSlug}`}
+            className="font-mono text-primary hover:underline break-all"
+          >
+            /wiki/{successSlug}
+          </Link>
+        </div>
+        <div className="flex flex-wrap gap-3">
           <Button asChild>
+            <Link href={`/wiki/${successSlug}`}>{t.wiki.usePrompt}</Link>
+          </Button>
+          <Button asChild variant="outline">
             <Link href="/profile">{t.account.profile}</Link>
           </Button>
-          <Button variant="outline" onClick={() => setSuccessSlug(null)}>
+          <Button variant="ghost" onClick={() => setSuccessSlug(null)}>
             {t.common.create}
           </Button>
         </div>
