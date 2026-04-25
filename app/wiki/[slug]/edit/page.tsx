@@ -8,12 +8,23 @@ export const dynamic = "force-dynamic";
 
 export const metadata = { title: "Edit prompt" };
 
+function safeDecode(s: string) {
+  try {
+    return decodeURIComponent(s);
+  } catch {
+    return s;
+  }
+}
+
 export default async function EditPromptPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  // Page dynamic params are not URL-decoded by Next.js 16 for non-ASCII
+  // segments (route handlers decode, pages do not). Decode defensively.
+  const slug = safeDecode(rawSlug);
   const supabase = await createClient();
 
   const {

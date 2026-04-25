@@ -25,41 +25,37 @@ import {
 
 export const dynamic = "force-dynamic";
 
+function safeDecode(s: string) {
+  try {
+    return decodeURIComponent(s);
+  } catch {
+    return s;
+  }
+}
+
 export default async function PromptDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  // Next.js 16 page dynamic params arrive URL-encoded for non-ASCII
+  // characters (verified empirically — route handlers decode, pages do not).
+  // Decode defensively so DB queries see the same UTF-8 we stored.
+  const slug = safeDecode(rawSlug);
   const supabase = await createClient();
 
-  const { data: prompt, error: promptErr } = await supabase
+  const { data: prompt } = await supabase
     .from("prompts")
     .select(
       "*, category:categories!category_id(id, slug, name_zh, name_en), author:profiles!author_id(id, username, display_name, avatar_url)",
     )
     .eq("slug", slug)
-    // No is_published filter here — RLS already handles visibility:
-    // public visitors only see published, authors see their own drafts,
-    // admins see everything. Filtering here would hide drafts from the
-    // author, breaking the "submit then preview" flow.
+    // No is_published filter — RLS handles visibility (public sees only
+    // published; authors see their own drafts; admins see all).
     .maybeSingle<PromptWithRelations>();
 
-  if (!prompt) {
-    const enc = new TextEncoder();
-    const bytes = enc.encode(slug);
-    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
-    return (
-      <pre className="p-6 text-xs">
-        DEBUG: not found
-        {"\n"}slug: {slug}
-        {"\n"}charLen: {slug.length}
-        {"\n"}byteLen: {bytes.length}
-        {"\n"}hex: {hex}
-        {"\n"}error: {promptErr?.message ?? "(none)"}
-      </pre>
-    );
-  }
+  if (!prompt) notFound();
 
   const {
     data: { user },
