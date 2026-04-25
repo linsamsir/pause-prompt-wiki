@@ -34,7 +34,7 @@ export function ImageUploader({
   const [errs, setErrs] = useState<string[]>([]);
   const [dragOver, setDragOver] = useState(false);
 
-  async function uploadOne(file: File): Promise<string | string> {
+  async function uploadOne(file: File): Promise<string> {
     if (!user) return "";
     if (file.size > MAX_BYTES) {
       setErrs((e) => [...e, `${t.uploader.tooLarge}${file.name}`]);
@@ -45,23 +45,69 @@ export function ImageUploader({
       return "";
     }
 
-    const ext = file.name.split(".").pop() || "jpg";
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
     const stamp = Date.now().toString(36);
     const rand = Math.random().toString(36).slice(2, 8);
     const path = `${user.id}/${stamp}-${rand}.${ext}`;
 
     const supabase = createClient();
-    const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
-      cacheControl: "31536000",
-      upsert: false,
-      contentType: file.type,
-    });
-    if (error) {
-      setErrs((e) => [...e, `${t.uploader.uploadFailed}${error.message}`]);
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!supabaseUrl || !anonKey) {
+      setErrs((e) => [...e, `${t.uploader.uploadFailed}env missing`]);
       return "";
     }
-    const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-    return data.publicUrl;
+
+    // Direct Storage REST POST. supabase.storage.upload() goes through the
+    // auth-js queue and hangs on us in some sessions (same family of bugs as
+    // the auth.updateUser hang); fetch with AbortController guarantees a
+    // result.
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      if (!token) throw new Error("no active session");
+
+      const controller = new AbortController();
+      const tid = setTimeout(() => controller.abort(), 30_000);
+
+      const res = await fetch(
+        `${supabaseUrl}/storage/v1/object/${BUCKET}/${path}`,
+        {
+          method: "POST",
+          headers: {
+            apikey: anonKey,
+            Authorization: `Bearer ${token}`,
+            "Content-Type": file.type,
+            "Cache-Control": "31536000",
+            "x-upsert": "false",
+          },
+          body: file,
+          signal: controller.signal,
+        },
+      );
+      clearTimeout(tid);
+
+      if (!res.ok) {
+        const body: { message?: string; error?: string; statusCode?: string } =
+          await res.json().catch(() => ({}));
+        const msg =
+          body.message || body.error || `HTTP ${res.status}`;
+        setErrs((e) => [...e, `${t.uploader.uploadFailed}${msg}`]);
+        return "";
+      }
+    } catch (e) {
+      const msg =
+        e instanceof DOMException && e.name === "AbortError"
+          ? "timeout after 30s"
+          : e instanceof Error
+            ? e.message
+            : String(e);
+      setErrs((e) => [...e, `${t.uploader.uploadFailed}${msg}`]);
+      return "";
+    }
+
+    // Bucket is public, so the URL is deterministic:
+    return `${supabaseUrl}/storage/v1/object/public/${BUCKET}/${path}`;
   }
 
   async function ingest(files: FileList | File[]) {
