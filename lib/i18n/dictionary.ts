@@ -246,6 +246,21 @@ type Dict = {
     uploadFailed: string;
     maxReached: string;
   };
+  edit: {
+    title: string;
+    subtitle: string;
+    save: string;
+    saving: string;
+    success: string;
+    error: string;
+    delete: string;
+    deleting: string;
+    deleteConfirm: string;
+    deleteError: string;
+    publishLabel: string;
+    publishHint: string;
+    cta: string;
+  };
   submit: {
     title: string;
     subtitle: string;
@@ -508,6 +523,21 @@ export const dict: Record<Locale, Dict> = {
       tooShort: "密碼至少 6 個字元。",
       error: "更新失敗：",
       noSession: "重設連結已失效，請重新寄送。",
+    },
+    edit: {
+      title: "編輯 Prompt",
+      subtitle: "修改現有 Prompt；管理員可切換發佈狀態。",
+      save: "儲存變更",
+      saving: "儲存中…",
+      success: "已儲存",
+      error: "更新失敗：",
+      delete: "刪除",
+      deleting: "刪除中…",
+      deleteConfirm: "確定要刪除這個 Prompt？此動作無法復原（連同收藏與按讚紀錄都會清除）。",
+      deleteError: "刪除失敗：",
+      publishLabel: "已發佈",
+      publishHint: "勾選後此 Prompt 對所有人可見；取消勾選會回到草稿狀態。",
+      cta: "編輯",
     },
     uploader: {
       label: "成果圖（選填）",
@@ -785,6 +815,23 @@ export const dict: Record<Locale, Dict> = {
       tooShort: "Password must be at least 6 characters.",
       error: "Update failed: ",
       noSession: "This reset link has expired. Please request a new one.",
+    },
+    edit: {
+      title: "Edit prompt",
+      subtitle: "Update an existing prompt; admins can also toggle publish state.",
+      save: "Save changes",
+      saving: "Saving…",
+      success: "Saved",
+      error: "Update failed: ",
+      delete: "Delete",
+      deleting: "Deleting…",
+      deleteConfirm:
+        "Delete this prompt? This cannot be undone — likes and favorites will be removed too.",
+      deleteError: "Delete failed: ",
+      publishLabel: "Published",
+      publishHint:
+        "When checked, this prompt is visible to everyone. Uncheck to return it to draft.",
+      cta: "Edit",
     },
     uploader: {
       label: "Result images (optional)",

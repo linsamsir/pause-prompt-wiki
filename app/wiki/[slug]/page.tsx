@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { CopyButton } from "@/components/copy-button";
 import { LikeButton, FavoriteButton } from "@/components/action-buttons";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { EditCta } from "./edit/_parts/edit-cta-label";
 import type { PromptWithRelations } from "@/lib/supabase/types";
 import {
   Back,
@@ -51,21 +53,29 @@ export default async function PromptDetailPage({
 
   let initialLiked = false;
   let initialFav = false;
+  let canEdit = false;
   if (user) {
-    const [{ data: likeRow }, { data: favRow }] = await Promise.all([
-      supabase
-        .from("likes")
-        .select("user_id")
-        .eq("user_id", user.id)
-        .eq("prompt_id", prompt.id)
-        .maybeSingle(),
-      supabase
-        .from("favorites")
-        .select("user_id")
-        .eq("user_id", user.id)
-        .eq("prompt_id", prompt.id)
-        .maybeSingle(),
-    ]);
+    const [{ data: likeRow }, { data: favRow }, { data: profile }] =
+      await Promise.all([
+        supabase
+          .from("likes")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .eq("prompt_id", prompt.id)
+          .maybeSingle(),
+        supabase
+          .from("favorites")
+          .select("user_id")
+          .eq("user_id", user.id)
+          .eq("prompt_id", prompt.id)
+          .maybeSingle(),
+        supabase
+          .from("profiles")
+          .select("is_admin")
+          .eq("id", user.id)
+          .maybeSingle<{ is_admin: boolean }>(),
+      ]);
+    canEdit = prompt.author_id === user.id || !!profile?.is_admin;
     initialLiked = !!likeRow;
     initialFav = !!favRow;
   }
@@ -126,6 +136,13 @@ export default async function PromptDetailPage({
           <CopyButton text={prompt.body}>
             <UsePrompt />
           </CopyButton>
+          {canEdit && (
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/wiki/${prompt.slug}/edit`}>
+                <Pencil className="size-4" /> <EditCta />
+              </Link>
+            </Button>
+          )}
         </div>
       </header>
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -181,6 +182,9 @@ export function PromptAdminTable({
                 )}
               </td>
               <td className="p-3 text-right space-x-2">
+                <Button asChild size="sm" variant="outline">
+                  <Link href={`/wiki/${p.slug}/edit`}>編輯</Link>
+                </Button>
                 <Button
                   size="sm"
                   variant="outline"
