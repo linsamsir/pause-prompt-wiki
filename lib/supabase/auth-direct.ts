@@ -1,12 +1,15 @@
 "use client";
 
-import { createClient } from "./client";
+import { readAccessTokenFromCookie } from "./access-token";
 
 /**
  * Directly call Supabase's GoTrue `PUT /auth/v1/user` endpoint with the caller's
  * access token. Bypasses `supabase.auth.updateUser()`, which in this project
  * has hung on us (internal session-refresh queue stalls). Supports both
  * password changes and user_metadata patches.
+ *
+ * Reads the bearer token straight from cookies — supabase.auth.getSession()
+ * itself has been observed to hang in some browsers, so we don't trust it.
  *
  * Always resolves — never throws — so callers can check `{ error }` plainly.
  */
@@ -15,17 +18,12 @@ export async function updateAuthUser(
   { timeoutMs = 15_000 }: { timeoutMs?: number } = {},
 ): Promise<{ error: string | null }> {
   try {
-    const supabase = createClient();
-    const { data: sessionData, error: sessionErr } =
-      await supabase.auth.getSession();
-    if (sessionErr || !sessionData.session) {
+    const accessToken = readAccessTokenFromCookie();
+    if (!accessToken) {
       return {
-        error:
-          sessionErr?.message ??
-          "No active session — please sign in again.",
+        error: "No active session — please sign in again.",
       };
     }
-    const accessToken = sessionData.session.access_token;
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 

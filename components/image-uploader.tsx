@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { useLocale } from "@/lib/i18n/provider";
 import { useSession } from "@/components/auth/session-provider";
-import { createClient } from "@/lib/supabase/client";
+import { readAccessTokenFromCookie } from "@/lib/supabase/access-token";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +50,6 @@ export function ImageUploader({
     const rand = Math.random().toString(36).slice(2, 8);
     const path = `${user.id}/${stamp}-${rand}.${ext}`;
 
-    const supabase = createClient();
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if (!supabaseUrl || !anonKey) {
@@ -58,14 +57,11 @@ export function ImageUploader({
       return "";
     }
 
-    // Direct Storage REST POST. supabase.storage.upload() goes through the
-    // auth-js queue and hangs on us in some sessions (same family of bugs as
-    // the auth.updateUser hang); fetch with AbortController guarantees a
-    // result.
+    // Read the access token from cookies directly — getSession() has hung
+    // on this user before. Fetch + AbortController guarantees a result.
     try {
-      const { data: sessionData } = await supabase.auth.getSession();
-      const token = sessionData.session?.access_token;
-      if (!token) throw new Error("no active session");
+      const token = readAccessTokenFromCookie();
+      if (!token) throw new Error("no active session (cookie read failed)");
 
       const controller = new AbortController();
       const tid = setTimeout(() => controller.abort(), 30_000);
