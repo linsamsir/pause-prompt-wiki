@@ -37,7 +37,10 @@ export default async function PromptDetailPage({
       "*, category:categories!category_id(id, slug, name_zh, name_en), author:profiles!author_id(id, username, display_name, avatar_url)",
     )
     .eq("slug", slug)
-    .eq("is_published", true)
+    // No is_published filter here — RLS already handles visibility:
+    // public visitors only see published, authors see their own drafts,
+    // admins see everything. Filtering here would hide drafts from the
+    // author, breaking the "submit then preview" flow.
     .maybeSingle<PromptWithRelations>();
 
   if (!prompt) notFound();
@@ -94,6 +97,7 @@ export default async function PromptDetailPage({
             </Badge>
           )}
           {prompt.is_nsfw && <Badge variant="nsfw">NSFW</Badge>}
+          {!prompt.is_published && <Badge variant="muted">Draft</Badge>}
           {prompt.model && <Badge variant="secondary">{prompt.model}</Badge>}
         </div>
         <h1 className="mt-3 font-serif-tc text-3xl font-semibold leading-tight md:text-4xl">
