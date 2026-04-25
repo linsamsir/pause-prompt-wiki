@@ -22,6 +22,15 @@ export async function GET(
     .eq("slug", slug)
     .maybeSingle();
 
+  // Same select the detail page uses, with embeds
+  const withEmbed = await supabase
+    .from("prompts")
+    .select(
+      "*, category:categories!category_id(id, slug, name_zh, name_en), author:profiles!author_id(id, username, display_name, avatar_url)",
+    )
+    .eq("slug", slug)
+    .maybeSingle();
+
   // Also try a wildcard ilike to see if the slug is "near" but not exact
   const fuzzy = await supabase
     .from("prompts")
@@ -35,6 +44,7 @@ export async function GET(
     slugByteLen: bytes.length,
     slugHex: hex,
     exact: { data, error: error?.message ?? null },
+    withEmbed: { data: withEmbed.data, error: withEmbed.error?.message ?? null },
     fuzzyMatches: { data: fuzzy.data, error: fuzzy.error?.message ?? null },
   });
 }
