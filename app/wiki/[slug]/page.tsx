@@ -125,6 +125,38 @@ export default async function PromptDetailPage({
         </div>
       </header>
 
+      {prompt.images && prompt.images.length > 0 && (
+        <section className="mt-8">
+          <div
+            className={
+              prompt.images.length === 1
+                ? "grid grid-cols-1"
+                : prompt.images.length === 2
+                  ? "grid grid-cols-1 gap-3 sm:grid-cols-2"
+                  : "grid grid-cols-2 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+            }
+          >
+            {prompt.images.map((src, i) => (
+              <a
+                key={src}
+                href={src}
+                target="_blank"
+                rel="noreferrer"
+                className="block border border-border bg-muted overflow-hidden hover:border-primary transition-colors"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={src}
+                  alt={`${prompt.title_zh} ${i + 1}`}
+                  loading="lazy"
+                  className="block w-full h-auto object-cover"
+                />
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="mt-8 grid gap-8 md:grid-cols-[1fr_260px]">
         <div className="space-y-6">
           <div>

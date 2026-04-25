@@ -35,6 +35,7 @@ export type Prompt = {
   parameters: string | null;
   model: string | null;
   tags: string[] | null;
+  images: string[];
   category_id: string | null;
   author_id: string | null;
   is_nsfw: boolean;

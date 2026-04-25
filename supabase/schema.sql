@@ -118,6 +118,7 @@ create table if not exists public.prompts (
   parameters text,
   model text,
   tags text[] default array[]::text[],
+  images text[] not null default array[]::text[],
   category_id uuid references public.categories(id) on delete set null,
   author_id uuid references public.profiles(id) on delete set null,
   is_nsfw boolean not null default false,
@@ -128,6 +129,10 @@ create table if not exists public.prompts (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- for existing installations
+alter table public.prompts
+  add column if not exists images text[] not null default array[]::text[];
 
 create index if not exists prompts_published_created_idx
   on public.prompts (is_published, created_at desc);
@@ -339,3 +344,49 @@ create or replace view public.prompts_public as
   where p.is_published;
 
 grant select on public.prompts_public to anon, authenticated;
+
+
+-- ---------------------------------------------------------------------
+-- storage: prompt-images (public read, owner-only write)
+-- ---------------------------------------------------------------------
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values (
+  'prompt-images',
+  'prompt-images',
+  true,
+  5 * 1024 * 1024,
+  array['image/jpeg','image/png','image/webp','image/gif']
+)
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
+drop policy if exists "prompt images public read" on storage.objects;
+create policy "prompt images public read" on storage.objects
+  for select using (bucket_id = 'prompt-images');
+
+drop policy if exists "prompt images user upload" on storage.objects;
+create policy "prompt images user upload" on storage.objects
+  for insert with check (
+    bucket_id = 'prompt-images'
+    and auth.uid() is not null
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+drop policy if exists "prompt images user delete" on storage.objects;
+create policy "prompt images user delete" on storage.objects
+  for delete using (
+    bucket_id = 'prompt-images'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+drop policy if exists "prompt images admin all" on storage.objects;
+create policy "prompt images admin all" on storage.objects
+  for all using (
+    bucket_id = 'prompt-images'
+    and exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_admin)
+  ) with check (
+    bucket_id = 'prompt-images'
+    and exists (select 1 from public.profiles p where p.id = auth.uid() and p.is_admin)
+  );

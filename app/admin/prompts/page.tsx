@@ -34,6 +34,18 @@ export default async function AdminPromptsPage() {
           ?.split(",")
           .map((t) => t.trim())
           .filter(Boolean) ?? [],
+      images: (() => {
+        try {
+          const raw = formData.get("images") as string | null;
+          if (!raw) return [] as string[];
+          const arr = JSON.parse(raw);
+          return Array.isArray(arr)
+            ? arr.filter((s) => typeof s === "string")
+            : [];
+        } catch {
+          return [] as string[];
+        }
+      })(),
       category_id: (formData.get("category_id") as string) || null,
       is_nsfw: formData.get("is_nsfw") === "on",
       is_published: formData.get("is_published") === "on",

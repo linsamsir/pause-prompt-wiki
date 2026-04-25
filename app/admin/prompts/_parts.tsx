@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { ImageUploader } from "@/components/image-uploader";
 import type { Category, Prompt } from "@/lib/supabase/types";
 
 export function PromptCreateForm({
@@ -16,14 +17,17 @@ export function PromptCreateForm({
   action: (f: FormData) => Promise<void>;
 }) {
   const [pending, start] = useTransition();
+  const [images, setImages] = useState<string[]>([]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const fd = new FormData(form);
+    fd.set("images", JSON.stringify(images));
     start(async () => {
       await action(fd);
       form.reset();
+      setImages([]);
     });
   }
 
@@ -63,6 +67,13 @@ export function PromptCreateForm({
           ))}
         </select>
       </div>
+      <div className="md:col-span-2">
+        <Label>成果圖（選填，最多 4 張）</Label>
+        <div className="mt-1">
+          <ImageUploader value={images} onChange={setImages} />
+        </div>
+      </div>
+
       <div className="md:col-span-2 flex items-center gap-6 pt-2">
         <label className="inline-flex items-center gap-2 text-sm">
           <input type="checkbox" name="is_nsfw" /> NSFW

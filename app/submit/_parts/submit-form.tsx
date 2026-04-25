@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ImageUploader } from "@/components/image-uploader";
 import type { Category } from "@/lib/supabase/types";
 
 export function SubmitForm({ categories }: { categories: Category[] }) {
@@ -31,6 +32,7 @@ export function SubmitForm({ categories }: { categories: Category[] }) {
   const [categoryId, setCategoryId] = useState("");
   const [slug, setSlug] = useState("");
   const [isNsfw, setIsNsfw] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -69,6 +71,7 @@ export function SubmitForm({ categories }: { categories: Category[] }) {
       author_id: user.id,
       is_nsfw: isNsfw,
       is_published: false,
+      images,
     };
 
     // Direct PostgREST insert — supabase.from().insert() was hanging the UI
@@ -135,6 +138,7 @@ export function SubmitForm({ categories }: { categories: Category[] }) {
     setCategoryId("");
     setSlug("");
     setIsNsfw(false);
+    setImages([]);
     router.refresh();
   }
 
@@ -275,6 +279,11 @@ export function SubmitForm({ categories }: { categories: Category[] }) {
           placeholder="auto"
         />
         <p className="text-xs text-muted-foreground">{t.submit.fieldSlugHint}</p>
+      </div>
+
+      <div className="space-y-1 md:col-span-2">
+        <Label>{t.uploader.label}</Label>
+        <ImageUploader value={images} onChange={setImages} />
       </div>
 
       <label className="inline-flex items-center gap-2 text-sm md:col-span-2">

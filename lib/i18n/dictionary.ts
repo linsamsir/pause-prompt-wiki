@@ -235,6 +235,17 @@ type Dict = {
     error: string;
     noSession: string;
   };
+  uploader: {
+    label: string;
+    hint: string;
+    addImage: string;
+    uploading: string;
+    remove: string;
+    tooLarge: string;
+    badType: string;
+    uploadFailed: string;
+    maxReached: string;
+  };
   submit: {
     title: string;
     subtitle: string;
@@ -497,6 +508,17 @@ export const dict: Record<Locale, Dict> = {
       tooShort: "密碼至少 6 個字元。",
       error: "更新失敗：",
       noSession: "重設連結已失效，請重新寄送。",
+    },
+    uploader: {
+      label: "成果圖（選填）",
+      hint: "拖曳或點選上傳；最多 4 張、每張 ≤ 5MB；JPG / PNG / WEBP / GIF",
+      addImage: "新增圖片",
+      uploading: "上傳中…",
+      remove: "移除",
+      tooLarge: "檔案太大（>5MB）：",
+      badType: "格式不支援：",
+      uploadFailed: "上傳失敗：",
+      maxReached: "最多 4 張",
     },
     submit: {
       title: "投稿 Prompt",
@@ -763,6 +785,17 @@ export const dict: Record<Locale, Dict> = {
       tooShort: "Password must be at least 6 characters.",
       error: "Update failed: ",
       noSession: "This reset link has expired. Please request a new one.",
+    },
+    uploader: {
+      label: "Result images (optional)",
+      hint: "Drop or click to upload — up to 4 images, ≤ 5MB each, JPG / PNG / WEBP / GIF",
+      addImage: "Add image",
+      uploading: "Uploading…",
+      remove: "Remove",
+      tooLarge: "File too large (>5MB): ",
+      badType: "Unsupported format: ",
+      uploadFailed: "Upload failed: ",
+      maxReached: "Max 4 images",
     },
     submit: {
       title: "Submit a prompt",

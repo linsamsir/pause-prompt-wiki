@@ -33,12 +33,24 @@ export function PromptCard({
     : null;
 
   const hide = prompt.is_nsfw && !showNsfw;
+  const cover = !hide && prompt.images?.length ? prompt.images[0] : null;
 
   return (
     <Link
       href={`/wiki/${prompt.slug}`}
-      className="group washi-card block h-full focus:outline-none focus-visible:border-primary"
+      className="group washi-card block h-full focus:outline-none focus-visible:border-primary overflow-hidden"
     >
+      {cover && (
+        <div className="aspect-[4/3] w-full overflow-hidden border-b border-border bg-muted">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={cover}
+            alt={title}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+          />
+        </div>
+      )}
       <article className="flex h-full flex-col p-5">
         <header className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2">
